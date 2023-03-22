@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_BASE, API_BASE_ALBUM, API_BASE_LIST } from "../../constants";
+import { API_BASE } from "../../constants";
 import { loaderChange } from "../AuthSlice";
 
 const reduxApiMiddleware = (store) => (next) => (action) => {
@@ -7,7 +7,7 @@ const reduxApiMiddleware = (store) => (next) => (action) => {
 
   const { type, payload } = action;
 
-  if (type === "API" || type == "API2" || type == "API3") {
+  if (type === "API") {
     const {
       url,
       data,
@@ -20,17 +20,13 @@ const reduxApiMiddleware = (store) => (next) => (action) => {
     if (!hideLoader) store.dispatch(loaderChange(true));
 
     return axios({
-      baseURL:
-        type == "API3"
-          ? API_BASE_ALBUM
-          : type == "API2"
-          ? API_BASE_LIST
-          : API_BASE,
+      baseURL: API_BASE,
       method,
       url,
       data,
     })
       .then((res) => {
+        console.log(res, "error");
         store.dispatch(loaderChange(false));
 
         if (success) store.dispatch(success(res.data));

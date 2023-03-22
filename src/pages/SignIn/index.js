@@ -11,12 +11,22 @@ import {
 } from "../../components/common/FormField";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
+import { getToken } from "firebase/messaging";
+import { auth, messaging, provider } from "../../firebase";
+import {
+  GoogleAuthProvider,
+  deleteUser,
+  signInWithPopup,
+  signOut,
+} from "firebase/auth";
+import { LOGIN_F, LOGIN_S, LS_AUTHTOKEN } from "../../constants";
+import { Button } from "react-bootstrap";
+import { OAuthProvider } from "firebase/auth";
 
 const SignIn = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [$signin, setSignin] = useState("asvdvd");
-  const [$password, setPassword] = useState();
+  const [password, setPassword] = useState();
   const [selectedValue, setSelectedValue] = useState();
   const [selectedValueChecked, setSelectedValueChecked] = useState();
   const {
@@ -25,9 +35,96 @@ const SignIn = () => {
     formState: { errors },
   } = useForm();
 
+  // Sign in with google
+  const signin = () => {
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        console.log("sign in called");
+        // The signed-in user info.
+        const user = result.user;
+        dispatch({ type: LOGIN_S, payload: user });
+        console.log(user);
+        navigate("/dashboard");
+        // IdP data available using getAdditionalUserInfo(result)
+        // ...
+      })
+      .catch(alert);
+  };
+  const signinApple = () => {
+    // import { getAuth, signInWithPopup, OAuthProvider } from "firebase/auth";
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        // The signed-in user info.
+        const user = result.user;
+        console.log(user);
+        // Apple credential
+        const credential = provider.credentialFromResult(result);
+        const accessToken = credential.accessToken;
+        const idToken = credential.idToken;
+
+        // IdP data available using getAdditionalUserInfo(result)
+        // ...
+      })
+      .catch((error) => {
+        // Handle Errors here.
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // The email of the user's account used.
+        const email = error.customData.email;
+        // The credential that was used.
+        const credential = provider.credentialFromError(error);
+        console.log(error);
+
+        // ...
+      });
+  };
+
+  const signOutGoogle = () => {
+    const user = auth.currentUser;
+    console.log(user.uid);
+    const uid = user.uid;
+    deleteUser(user)
+      .then(() => {
+        // User deleted.
+        dispatch({ type: LOGIN_F });
+        console.log("User Deleted");
+      })
+      .catch((error) => {
+        // An error ocurred
+        // ...
+      });
+    signOut(auth)
+      .then(() => {
+        console.log("success");
+        // Sign-out successful.
+      })
+      .catch((error) => {
+        // An error happened.
+      });
+  };
+
+  async function requestPermission() {
+    const permission = await Notification.requestPermission();
+    if (permission == "granted") {
+      //generate token
+      const token = await getToken(messaging, {
+        vapidKey:
+          "BDSL59252NmnsgU22nGqkSYQX7UaLo5s0rpux78vKDBh8oFWD4NTtjnRcoGO9jbzGJ_uyq2cTpnDIqmv7vubgOk",
+        // serviceWorkerRegistration: swRegistration,
+      });
+      console.log("token generated true", token);
+      // localStorage.setItem("token", token);
+    } else if (permission == "denied") {
+      alert("denined permission");
+    }
+  }
+
   useEffect(() => {
-    console.log($signin);
-    return () => {};
+    // console.log($signin);
+    requestPermission();
   }, []);
 
   const gender = [
@@ -109,16 +206,11 @@ const SignIn = () => {
         style={{
           display: "flex",
           justifyContent: "center",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          style={{
-            flexDirection: "column",
-            height: "100vh",
-            display: "flex",
-          }}
-        >
+        <form onSubmit={handleSubmit(onSubmit)}>
           <RenderInput
             labelName={"name"}
             aria-label={"hello world"}
@@ -184,72 +276,22 @@ const SignIn = () => {
             onChange={checkGroupHandler}
             errors={errors}
           />
-          <input type="submit" />
+          <input type="submit" class="btn btn-primary" />
         </form>
-        {/* simple form submit validation */}
-        {/* <form
-          onSubmit={handleSubmit(onSubmit)}
-          style={{
-            flexDirection: "column",
-            height: "100vh",
-            display: "flex",
-          }}
-        >
-          <input
-            type="text"
-            placeholder="First name"
-            {...register("firstname", { required: true, maxLength: 80 })}
-          />
-          {errors.firstname && <span>First name field is required</span>}
-          <input
-            type="text"
-            style={{ marginBlock: 10 }}
-            placeholder="Last name"
-            {...register("lastname", { required: true, maxLength: 100 })}
-          />
-          {errors.lastname && <span>Last name field is required</span>}
-          <input
-            type="text"
-            placeholder="Email"
-            {...register("email", { required: true, pattern: /^\S+@\S+$/i })}
-          />
-          {errors.email && <span>Email field is required</span>}
-          <input
-            type="tel"
-            style={{ marginBlock: 10 }}
-            placeholder="Mobile number"
-            {...register("mobilenumber", {
-              required: true,
-              minLength: 6,
-              maxLength: 12,
-            })}
-          />
-          {errors.mobilenumber && <span>Mobile Number is required</span>}
-          <select {...register("title", { required: true })}>
-            <option value="Mr">Mr</option>
-            <option value="Mrs">Mrs</option>
-            <option value="Miss">Miss</option>
-            <option value="Dr">Dr</option>
-          </select>
+        <div style={{ marginTop: 10 }}>
+          <center>
+            <button class="btn btn-primary" onClick={signin}>
+              Sign In with Google
+            </button>
 
-          <div style={{ flexDirection: "row" }}>
-            <input
-              {...register("developer", { required: true })}
-              type="radio"
-              value="Yes"
-            />
-            <input
-              {...register("developer", { required: true })}
-              type="radio"
-              value="No"
-            />
-          </div>
-
-          <input type="submit" />
-        </form> */}
-        {/* <button type="button" onClick={handleClick}>
-          Login Test
-        </button> */}
+            {/* <button class="btn btn-dark m-2" onClick={signinApple}>
+              Sign In with Apple
+            </button> */}
+            {/* <button class="btn btn-primary" onClick={signOutGoogle}>
+              Sign Out Google
+            </button> */}
+          </center>
+        </div>
       </div>
     </>
   );

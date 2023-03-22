@@ -61,7 +61,7 @@ const MyAccount = () => {
         <Link to="/dashboard">Dashboard</Link>
       </h3>
       <input
-        placeholder="Searth the content..."
+        placeholder="Search the content..."
         type="text"
         name="text"
         className="input"

@@ -35,11 +35,11 @@ export const getProductList = (data) => ({
 const productSlice = createSlice({
   name: "product",
   initialState: initialState,
-  // reducers: {
-  //   loaderChange: (state, payload) => {
-  //     state.isLoading = payload.payload;
-  //   },
-  // },
+  reducers: {
+    loaderChange: (state, payload) => {
+      state.isLoading = payload.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(PRODUCT_LIST_S, (state, action) => {
       // console.log(action.payload);
@@ -57,5 +57,5 @@ const productSlice = createSlice({
   },
 });
 
-// export const { loaderChange } = productSlice.actions;
+export const { loaderChange } = productSlice.actions;
 export default productSlice.reducer;

@@ -13,10 +13,17 @@ export const RenderInput = ({
 }) => {
   const shortenedLabel = labelName.replace(/\s+/g, "");
   return (
-    <div className={containerClass}>
-      <label style={{ marginRight: 10 }}>{labelName}</label>
-      {/* <input type={type} {...props} className={inputClass} name={name} /> */}
-      <input type={type} {...props} {...register} placeholder={placeholder} />
+    <div className="form-group">
+      <label htmlFor="exampleInputEmail1" style={{ marginRight: 10 }}>
+        {labelName}
+      </label>
+      <input
+        className="form-control"
+        type={type}
+        {...props}
+        {...register}
+        placeholder={placeholder}
+      />
       {errors[shortenedLabel] && (
         <span>*{errors[shortenedLabel]?.message}</span>
       )}
@@ -27,9 +34,18 @@ export const RenderInput = ({
 //drop down button component
 export const Select = React.forwardRef(
   ({ onChange, onBlur, name, label, options = [{}], errors }, ref) => (
-    <div style={{ flexDirection: "row", marginBlock: 20 }}>
+    <div
+      className="form-group"
+      style={{ flexDirection: "row", marginBlock: 20 }}
+    >
       <label style={{ marginRight: 10 }}>{label}</label>
-      <select name={name} ref={ref} onChange={onChange} onBlur={onBlur}>
+      <select
+        class="form-control"
+        name={name}
+        ref={ref}
+        onChange={onChange}
+        onBlur={onBlur}
+      >
         {options.map((obj) => (
           <option key={obj?.value} value={obj?.value}>
             {obj?.name}
@@ -44,7 +60,15 @@ export const Select = React.forwardRef(
 export const RadioButton = ({ label, id, register, errors, ...rest }) => {
   return (
     <>
-      <input id={id} type="radio" {...register} {...rest} />
+      <input
+        className="custom-control-input"
+        id={id}
+        style={{ margin: 3 }}
+        // id="customRadioInline1"
+        type="radio"
+        {...register}
+        {...rest}
+      />
       <span>{label}</span>
     </>
   );
@@ -94,8 +118,15 @@ export const CheckBox = ({
 }) => {
   return (
     <>
-      <input type="checkbox" name={name} {...register} {...rest} />
-      <span>{label}</span>
+      <input
+        class="form-check-input"
+        type="checkbox"
+        style={{ marginInline: 4 }}
+        name={name}
+        {...register}
+        {...rest}
+      />
+      <label class="form-check-label">{label}</label>
     </>
   );
 };

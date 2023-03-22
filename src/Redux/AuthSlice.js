@@ -47,13 +47,14 @@ const loginSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(LOGIN_S, (state, action) => {
       // Default header for auth
-      axios.defaults.headers.common["Authorization"] = action.payload.token;
-      // action.payload.data.token;
-
-      // JSON.stringify(action.payload.data.token)
-      localStorage.setItem(LS_AUTHTOKEN, JSON.stringify(action.payload.token));
-      // localStorage.setItem(LS_USER, JSON.stringify(action.payload.data));
-      localStorage.setItem(LS_USER, JSON.stringify(action.payload.token));
+      axios.defaults.headers.common["Authorization"] =
+        action.payload.accessToken;
+      console.log(action.payload);
+      localStorage.setItem(
+        LS_AUTHTOKEN,
+        JSON.stringify(action.payload.stsTokenManager.accessToken)
+      );
+      localStorage.setItem(LS_USER, JSON.stringify(action.payload));
 
       state.userData = action.payload;
       state.isLoggedIn = true;

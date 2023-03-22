@@ -5,12 +5,13 @@ export const toAbsoluteUrl = (pathname) => process.env.PUBLIC_URL + pathname;
 
 // Fun used for setting up the common header for axios through out the app and rehydrate the redux store
 export const setupAxios = (axios, store) => {
+  // console.log("token", localStorage.getItem(LS_AUTHTOKEN));
   const token = JSON.parse(localStorage.getItem(LS_AUTHTOKEN));
   const userData = JSON.parse(localStorage.getItem(LS_USER));
 
   // It's used to rehydrate redux auth data when page is refreshed
   if (token) {
-    store.dispatch({ type: LOGIN_S, payload: { data: userData } });
+    store.dispatch({ type: LOGIN_S, payload: userData });
   } else {
     store.dispatch({ type: LOGIN_F, payload: {} });
   }
